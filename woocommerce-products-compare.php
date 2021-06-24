@@ -1,11 +1,11 @@
 <?php
 /**
- * Plugin Name: WooCommerce Products Compare
+ * Plugin Name: TECHPACE Products Compare
  * Plugin URI: https://woocommerce.com/products/woocommerce-products-compare/
  * Description: Have your customers to compare similar products side by side.
  * Version: 1.0.24
- * Author: WooCommerce
- * Author URI: https://woocommerce.com
+ * Author: TECHPACE
+ * Author URI: https://techpace.co
  * Text Domain: woocommerce-products-compare
  * Domain Path: /languages
  * Tested up to: 5.6

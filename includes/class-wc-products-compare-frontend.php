@@ -23,9 +23,10 @@ class WC_Products_Compare_Frontend {
 
 		} else {
 			// Display compare button after add to cart.
-			add_action( 'woocommerce_after_shop_loop_item', array( $this, 'display_compare_button' ), 11 );
-			add_action( 'woocommerce_single_product_summary', array( $this, 'display_compare_button' ), 31 );
-
+			add_action( 'flatsome_product_box_after', array( $this, 'display_compare_button' ), 70 );
+			//add_action( 'woocommerce_single_product_summary', array( $this, 'display_compare_button' ), 31 );
+			add_action( 'woocommerce_single_product_summary', array( $this, 'display_compare_button' ), 5 );
+			add_action( 'wp_footer', array( $this, 'display_compare_popup' ), 8);
 			add_action( 'wp_enqueue_scripts', array( $this, 'load_scripts' ) );
 		}
 
@@ -98,23 +99,25 @@ class WC_Products_Compare_Frontend {
 	public function load_scripts() {
 		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 
-		wp_enqueue_script( 'wc_products_compare_script', plugins_url( 'assets/js/frontend' . $suffix . '.js', dirname( __FILE__ ) ), array( 'jquery', 'jquery-cookie' ), WC_PRODUCTS_COMPARE_VERSION, true );
+		wp_enqueue_script( 'wc_products_compare_script', plugins_url( 'assets/js/frontend.js', dirname( __FILE__ ) ), array( 'jquery', 'jquery-cookie' ), WC_PRODUCTS_COMPARE_VERSION, true );
+		// wp_enqueue_script( 'wc_products_compare_script', plugins_url( 'assets/js/frontend' . $suffix . '.js', dirname( __FILE__ ) ), array( 'jquery', 'jquery-cookie' ), WC_PRODUCTS_COMPARE_VERSION, true );
 
 		// Maximum products allowed to be compared.
-		$max_products = apply_filters( 'woocommerce_products_compare_max_products', 5 );
+		$max_products = apply_filters( 'woocommerce_products_compare_max_products', 4 );
 
 		$localized_vars = array(
 			'ajaxurl'              => admin_url( 'admin-ajax.php' ),
 			'ajaxAddProductNonce'  => wp_create_nonce( '_wc_products_compare_add_product_nonce' ),
 			'noCookies'            => __( 'Sorry, you must have cookies enabled in your browser to use compare products feature', 'woocommerce-products-compare' ),
 			'cookieName'           => self::$cookie_name,
-			'cookieExpiry'         => apply_filters( 'woocommerce_products_compare_cookie_expiry', 7 ),
+			'cookieExpiry'         => apply_filters( 'woocommerce_products_compare_cookie_expiry', 1 ),
 			'maxProducts'          => $max_products,
 			'maxAlert'             => sprintf( __( 'Sorry, a maximum of %s products can be compared at one time.', 'woocommerce-products-compare' ), $max_products ),
 			'noProducts'           => WC_products_compare_Frontend::empty_message(),
 			'moreProducts'         => __( 'Please add at least 2 or more products to compare.', 'woocommerce-products-compare' ),
 			'widgetNoProducts'     => __( 'Add some products to compare.', 'woocommerce-products-compare' ),
 			'widgetRemoveProducts' => __( 'Remove all products', 'woocommerce-products-compare' ),
+			'endpoint'				=> site_url() . '/' .WC_Products_Compare_Frontend::get_endpoint()
 		);
 
 		wp_localize_script( 'wc_products_compare_script', 'wc_products_compare_local', $localized_vars );
@@ -202,18 +205,76 @@ class WC_Products_Compare_Frontend {
 	 */
 	public function display_compare_button() {
 		global $post;
-
-		$name = __( 'Compare', 'woocommerce-products-compare' );
+		$name = __( 'So sánh', 'woocommerce-products-compare' );
 
 		$checked = checked( $this->is_listed( $post->ID ), true, false );
+		$active = $this->is_listed( $post->ID ) ? 'active' : '';
+		// $active_text = $this->is_listed( $post->ID ) ? 'Đã thêm' : 'So sánh';
+		// $html = '<div class="woocommerce-products-compare-compare-button"><label for="woocommerce-products-compare-checkbox-' . esc_attr( $post->ID ) . '"><input type="checkbox" class="woocommerce-products-compare-checkbox" data-product-id="' . esc_attr( $post->ID ) . '" ' . $checked . ' id="woocommerce-products-compare-checkbox-' . esc_attr( $post->ID ) . '" />&nbsp;' . $name . '</label> </div>';
 
-		$html = '<p class="woocommerce-products-compare-compare-button"><label for="woocommerce-products-compare-checkbox-' . esc_attr( $post->ID ) . '"><input type="checkbox" class="woocommerce-products-compare-checkbox" data-product-id="' . esc_attr( $post->ID ) . '" ' . $checked . ' id="woocommerce-products-compare-checkbox-' . esc_attr( $post->ID ) . '" />&nbsp;' . $name . '</label> <a href="' . get_home_url() . '/' . $this->get_endpoint() . '" title="' . esc_attr__( 'Compare Page', 'woocommerce-products-compare' ) . '" class="woocommerce-products-compare-compare-link"><span class="dashicons dashicons-external"></span></a></p>';
+		//<a href="' . get_home_url() . '/' . $this->get_endpoint() . '" title="' . esc_attr__( 'Compare Page', 'woocommerce-products-compare' ) . '" class="woocommerce-products-compare-compare-link"><span class="dashicons dashicons-external"></span></a>
 
+		$html= '<div class="techpace-compare-trigger__wrapper"><button class="button techpace-compare-trigger"  data-product-link="' . esc_attr( get_permalink($post->ID) ) .'" data-product-id="' . esc_attr( $post->ID ).'" data-product-name="'.esc_attr( $post->post_title).'" data-product-image-url="'.esc_attr( get_the_post_thumbnail_url($post->ID) ).'">'.$name.'</button></div>';
 		echo apply_filters( 'woocommerce_products_compare_compare_button', $html, $post->ID, $checked );
-
+		wp_reset_postdata();
 		return true;
 	}
+	/*TECHPACE POPUP COMPARE */
+	public function display_compare_popup() {
 
+		$html = '<div id="techpace-compare-popup"><div class="techpace-compare-popup__wrapper"><h2>So sánh sản phẩm</h2><span class="close-popup-btn">x Đóng</span><div id="techpace-compare__mess"></div>';
+
+		$products = WC_Products_Compare_Frontend::get_compared_products();
+
+		$endpoint = WC_Products_Compare_Frontend::get_endpoint();
+
+		if ( $products ) {
+
+			$html .= '<ul class="techpace-compare-list">' . PHP_EOL;
+
+			foreach ( $products as $product ) {
+				$product = wc_get_product( $product );
+
+				if ( ! WC_Products_Compare::is_product( $product ) ) {
+					continue;
+				}
+
+				$post = get_post( $product->get_id() );
+
+				$html .= '<li class="techpace-compare-item" data-product-id="' . esc_attr( $product->get_id() ) . '">' . PHP_EOL;
+
+				$html .= '<a href="' . get_permalink( $product->get_id() ) . '" title="' . esc_attr( $post->post_title ) . '" class="product-link">' . PHP_EOL;
+
+				$html .= '<div class="img-wrap"><div>'.$product->get_image( 'shop_thumbnail' ) .'</div></div>'. PHP_EOL;
+
+				$html .= '<h3>' . $post->post_title . '</h3>' . PHP_EOL;
+
+				$html .= '</a>' . PHP_EOL;
+
+				$html .= '<span class="techpace-compare-item__remove" href="#" title="' . esc_attr__( 'Remove Product', 'woocommerce-products-compare' ) . '" onclick="removeCompare('.esc_attr( $product->get_id() ).', event)">x</a>' . PHP_EOL;
+
+				$html .= '</li>' . PHP_EOL;
+			}
+
+			$html .= '</ul>' . PHP_EOL;
+
+		} else {
+			$html .= '<p class="no-products">' . __( 'Add some products to compare.', 'woocommerce-products-compare' ) . '</p>' . PHP_EOL;
+		}
+		$html .= '<div class="techpace-compare__button-wrapper">';
+
+		$html .= '<a href="' . esc_url( site_url() . '/' . $endpoint  ) . '" title="' . esc_attr( 'So sánh ngay', 'woocommerce-products-compare' ) . '" class="button techpace-compare__button">' . __( 'So sánh ngay', 'woocommerce-products-compare' ) . '</a>' . PHP_EOL;
+
+		if ( $products ) {
+			$html .= '<a href="#" title="' . esc_attr__( 'Xóa tất cả sản phẩms', 'woocommerce-products-compare' ) . '" class="techpace-remove-all__button">' . esc_html__( 'Xóa tất cả sản phẩm', 'woocommerce-products-compare' ) . '</a>' . PHP_EOL;
+		};
+
+		$html .= '</div>' . PHP_EOL;
+	
+		$html.="</div></div>";
+		echo $html;
+		return true;
+	}
 	/**
 	 * Checks if the product is listed in the compared products cookie.
 	 *
