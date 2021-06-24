@@ -100,6 +100,8 @@ class WC_Products_Compare_Frontend {
 		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 
 		wp_enqueue_script( 'wc_products_compare_script', plugins_url( 'assets/js/frontend.js', dirname( __FILE__ ) ), array( 'jquery', 'jquery-cookie' ), WC_PRODUCTS_COMPARE_VERSION, true );
+		
+		//deactive min.js
 		// wp_enqueue_script( 'wc_products_compare_script', plugins_url( 'assets/js/frontend' . $suffix . '.js', dirname( __FILE__ ) ), array( 'jquery', 'jquery-cookie' ), WC_PRODUCTS_COMPARE_VERSION, true );
 
 		// Maximum products allowed to be compared.

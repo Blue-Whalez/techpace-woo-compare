@@ -14,7 +14,7 @@ get_header( 'shop' ); ?>
 
 <noscript><?php esc_html_e( 'Sorry, you must have Javascript enabled in your browser to use compare products', 'woocommerce-products-compare' ); ?></noscript>
 
-<div class="woocommerce-products-compare-content woocommerce">
+<div class="row row-collapse woocommerce-products-compare-content woocommerce">
 	<?php
 
 	$products = WC_Products_Compare_Frontend::get_compared_products();

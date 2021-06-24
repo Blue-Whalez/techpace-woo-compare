@@ -51,7 +51,7 @@ if ( ! class_exists( 'WC_Products_Compare' ) ) :
 
 			require_once dirname( __FILE__ ) . '/includes/class-wc-products-compare-frontend.php';
 
-			add_action( 'widgets_init', array( $this, 'register_widget' ) );
+			//add_action( 'widgets_init', array( $this, 'register_widget' ) );
 
 			if ( is_admin() ) {
 				require_once dirname( __FILE__ ) . '/includes/class-wc-products-compare-admin.php';
