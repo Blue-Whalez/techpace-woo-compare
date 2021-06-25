@@ -5,7 +5,6 @@ jQuery(document).ready(function ($) {
 	$.wc_products_compare_frontend = {
 		getComparedProducts: function () {
 			var products = $.cookie(wc_products_compare_local.cookieName);
-
 			if (typeof products !== "undefined" && products.length) {
 				return products.split(",");
 			} else {
@@ -146,7 +145,6 @@ jQuery(document).ready(function ($) {
 			function checkAvailable(el) {
 				let count_cookies =
 					$.wc_products_compare_frontend.getComparedProducts().length - 1;
-				console.log("check", count_cookies);
 				if (count_cookies <= 1) {
 					if (!el.hasClass("disabled")) {
 						el.addClass("disabled");
@@ -158,7 +156,6 @@ jQuery(document).ready(function ($) {
 						el.removeClass("disabled");
 						if (el.hasClass("techpace-compare__button"))
 							el.attr("href", wc_products_compare_local.endpoint);
-						console.log(wc_products_compare_local.endpoint);
 					}
 				}
 			}
@@ -169,14 +166,14 @@ jQuery(document).ready(function ($) {
 						alert(wc_products_compare_local.noCookies);
 						return;
 					}
-
+					let compare_list =
+					$.wc_products_compare_frontend.getComparedProducts();
 					if (!popup.hasClass("active")) {
 						//add product on UI
 						//check số lượng
-						let compare_list =
-							$.wc_products_compare_frontend.getComparedProducts();
-						let count_items = compare_list.length - 1;
-						//console.log(count_items);
+						
+						let count_items = compare_list.length;
+						console.log('count cookie', count_items);
 						if (count_items < 3) {
 							let this_product = {
 								name: $(this).data("product-name"),
@@ -220,7 +217,7 @@ jQuery(document).ready(function ($) {
 							);
 						}
 						//open
-						console.log("open compare popup");
+						//console.log("open compare popup");
 						popup.addClass("active");
 					}
 					checkAvailable(popup_compare_btn);
@@ -296,9 +293,7 @@ jQuery(document).ready(function ($) {
 			//	Init cookie while non-exist
 			let cookie = getCookie(wc_products_compare_local.cookieName);
 			if(cookie==""){
-				//console.log('không có cookie!')
 				setCookie(wc_products_compare_local.cookieName, "false",wc_products_compare_local.cookieExpiry );
-				location.reload();
 			}
 			// 	Add/remove products to compare
 			$.wc_products_compare_frontend.popupCompare();

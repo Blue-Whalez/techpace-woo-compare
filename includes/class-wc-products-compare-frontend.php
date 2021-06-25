@@ -32,6 +32,7 @@ class WC_Products_Compare_Frontend {
 
 		// Set the cookie name.
 		self::$cookie_name = 'wc_products_compare_products';
+		
 
 		add_action( 'init', array( $this, 'add_endpoint' ) );
 
@@ -99,7 +100,7 @@ class WC_Products_Compare_Frontend {
 	public function load_scripts() {
 		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 
-		wp_enqueue_script( 'wc_products_compare_script', plugins_url( 'assets/js/frontend.js', dirname( __FILE__ ) ), array( 'jquery', 'jquery-cookie' ), WC_PRODUCTS_COMPARE_VERSION, true );
+		wp_enqueue_script( 'wc_products_compare_script', plugins_url( 'assets/js/techpace-fe.js', dirname( __FILE__ ) ), array( 'jquery', 'jquery-cookie' ), WC_PRODUCTS_COMPARE_VERSION, true );
 		
 		//deactive min.js
 		// wp_enqueue_script( 'wc_products_compare_script', plugins_url( 'assets/js/frontend' . $suffix . '.js', dirname( __FILE__ ) ), array( 'jquery', 'jquery-cookie' ), WC_PRODUCTS_COMPARE_VERSION, true );
@@ -112,7 +113,7 @@ class WC_Products_Compare_Frontend {
 			'ajaxAddProductNonce'  => wp_create_nonce( '_wc_products_compare_add_product_nonce' ),
 			'noCookies'            => __( 'Sorry, you must have cookies enabled in your browser to use compare products feature', 'woocommerce-products-compare' ),
 			'cookieName'           => self::$cookie_name,
-			'cookieExpiry'         => apply_filters( 'woocommerce_products_compare_cookie_expiry', 1 ),
+			'cookieExpiry'         => apply_filters( 'woocommerce_products_compare_cookie_expiry', 7 ),
 			'maxProducts'          => $max_products,
 			'maxAlert'             => sprintf( __( 'Sorry, a maximum of %s products can be compared at one time.', 'woocommerce-products-compare' ), $max_products ),
 			'noProducts'           => WC_products_compare_Frontend::empty_message(),
@@ -187,7 +188,7 @@ class WC_Products_Compare_Frontend {
 	public function display_template( $path ) {
 		if ( $this->is_compare_page() ) {
 			wc_get_template(
-				'products-compare-page-html.php',
+				'techpace-compare-page.php',
 				'',
 				'',
 				plugin_dir_path( dirname( __FILE__ ) ) . 'templates/'
@@ -223,6 +224,7 @@ class WC_Products_Compare_Frontend {
 	}
 	/*TECHPACE POPUP COMPARE */
 	public function display_compare_popup() {
+		
 
 		$html = '<div id="techpace-compare-popup"><div class="techpace-compare-popup__wrapper"><h2>So sánh sản phẩm</h2><span class="close-popup-btn">x Đóng</span><div id="techpace-compare__mess"></div>';
 
@@ -230,7 +232,7 @@ class WC_Products_Compare_Frontend {
 
 		$endpoint = WC_Products_Compare_Frontend::get_endpoint();
 
-		if ( $products ) {
+		//if ( $products ) {
 
 			$html .= '<ul class="techpace-compare-list">' . PHP_EOL;
 
@@ -260,9 +262,9 @@ class WC_Products_Compare_Frontend {
 
 			$html .= '</ul>' . PHP_EOL;
 
-		} else {
-			$html .= '<p class="no-products">' . __( 'Add some products to compare.', 'woocommerce-products-compare' ) . '</p>' . PHP_EOL;
-		}
+		//} else {
+			// $html .= '<p class="no-products">' . __( 'Add some products to compare.', 'woocommerce-products-compare' ) . '</p>' . PHP_EOL;
+		//}
 		$html .= '<div class="techpace-compare__button-wrapper">';
 
 		$html .= '<a href="' . esc_url( site_url() . '/' . $endpoint  ) . '" title="' . esc_attr( 'So sánh ngay', 'woocommerce-products-compare' ) . '" class="button techpace-compare__button">' . __( 'So sánh ngay', 'woocommerce-products-compare' ) . '</a>' . PHP_EOL;
@@ -295,6 +297,35 @@ class WC_Products_Compare_Frontend {
 		}
 	}
 
+	/**
+	 * Custom shortname for product attributes. 
+	 *
+	 * @since 1.0.0
+	 * @return $res string
+	 */
+	public static function get_short_name($string) {
+		$res = '';
+		switch($string){
+			case 'sku':
+				$res = esc_html( 'SKU', 'woocommerce-products-compare' );
+				break;
+			case 'description':
+				$res = esc_html( 'Description', 'woocommerce-products-compare' );
+				break;
+			case 'pa_cpu':
+				$res = esc_html( 'CPU', 'woocommerce-products-compare' );
+				break;
+			case 'pa_man-hinh-laptop':
+				$res = esc_html( 'Màn hình', 'woocommerce-products-compare' );
+				break;
+			case 'pa_dung-luong':
+				$res = esc_html( 'Dung lượng', 'woocommerce-products-compare' );
+				break;
+			default:
+				$res=wc_attribute_label($string);
+		}
+		return $res;
+	}
 	/**
 	 * Get the selected compared products from cookie.
 	 *
@@ -405,7 +436,7 @@ class WC_Products_Compare_Frontend {
 	 * @return mix $html
 	 */
 	public static function empty_message() {
-		$html = '';
+		$html = '<div class="empty-mess">';
 
 		$html .= '<p>' . esc_html__( 'Sorry you do not have any products to compare.', 'woocommerce-products-compare' ) . '</p>' . PHP_EOL;
 
@@ -413,7 +444,7 @@ class WC_Products_Compare_Frontend {
 
 		$html .= '<a href="' . apply_filters( 'woocommerce_return_to_shop_redirect', get_permalink( wc_get_page_id( 'shop' ) ) ) . '" title="' . esc_attr__( 'Return to Shop.', 'woocommerce-products-compare' ) . '" class="button wc-backward">' . esc_html__( 'Return to Shop', 'woocommerce-products-compare' ) . '</a>' . PHP_EOL;
 
-		$html .= '</p>' . PHP_EOL;
+		$html .= '</p></div>' . PHP_EOL;
 
 		return $html;
 	}

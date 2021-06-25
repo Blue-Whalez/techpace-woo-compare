@@ -54,8 +54,8 @@ class WC_Products_Compare_Admin {
 					<td data-export-label="Template Overrides"><?php _e( 'Template Overrides:', 'woocommerce-products-compare' ); ?></td>
 					<td colspan="2">
 						<?php $theme = wp_get_theme(); ?>
-						<?php if ( file_exists( get_stylesheet_directory() . '/woocommerce-products-compare/products-compare-page-html.php' ) ) {
-							echo strtolower( str_replace( ' ', '', $theme->name ) ) . '/woocommerce-products-compare/products-compare-page-html.php';
+						<?php if ( file_exists( get_stylesheet_directory() . '/woocommerce-products-compare/techpace-compare-page.php' ) ) {
+							echo strtolower( str_replace( ' ', '', $theme->name ) ) . '/woocommerce-products-compare/techpace-compare-page.php';
 						} ?>
 					</td>
 				</tr>
