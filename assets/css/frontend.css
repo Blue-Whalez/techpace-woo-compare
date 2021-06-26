@@ -347,6 +347,9 @@
     margin: 0;
     margin-bottom: 15px;
     border-radius: 5px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
 }
 #techpace-compare-popup .techpace-compare__button.disabled{
 	pointer-events: none;

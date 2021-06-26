@@ -23,8 +23,13 @@ class WC_Products_Compare_Frontend {
 
 		} else {
 			// Display compare button after add to cart.
-			add_action( 'flatsome_product_box_after', array( $this, 'display_compare_button' ), 70 );
-			add_action( 'woocommerce_after_shop_loop_item_title', array( $this, 'display_compare_button' ), 5 );
+			$theme = wp_get_theme(); // gets the current theme
+			if ( 'Flatsome' == $theme->name || 'Flatsome' == $theme->parent_theme ) {
+				add_action( 'flatsome_product_box_after', array( $this, 'display_compare_button' ), 70 );
+			}
+			else{
+				add_action( 'woocommerce_shop_loop_item_title', array( $this, 'display_compare_button' ), 20 );
+			}
 			add_action( 'woocommerce_single_product_summary', array( $this, 'display_compare_button' ), 31 );
 			add_action( 'wp_footer', array( $this, 'display_compare_popup' ), 8);
 			add_action( 'wp_enqueue_scripts', array( $this, 'load_scripts' ) );
@@ -207,6 +212,7 @@ class WC_Products_Compare_Frontend {
 	 * @return $html mixed
 	 */
 	public function display_compare_button() {
+
 		global $post;
 		$name = __( 'So sánh', 'woocommerce-products-compare' );
 
