@@ -25,7 +25,7 @@ class WC_Products_Compare_Frontend {
 			// Display compare button after add to cart.
 			add_action( 'flatsome_product_box_after', array( $this, 'display_compare_button' ), 70 );
 			//add_action( 'woocommerce_single_product_summary', array( $this, 'display_compare_button' ), 31 );
-			add_action( 'woocommerce_single_product_summary', array( $this, 'display_compare_button' ), 5 );
+			add_action( 'woocommerce_after_shop_loop_item_title', array( $this, 'display_compare_button' ), 5 );
 			add_action( 'wp_footer', array( $this, 'display_compare_popup' ), 8);
 			add_action( 'wp_enqueue_scripts', array( $this, 'load_scripts' ) );
 		}
@@ -217,12 +217,15 @@ class WC_Products_Compare_Frontend {
 
 		//<a href="' . get_home_url() . '/' . $this->get_endpoint() . '" title="' . esc_attr__( 'Compare Page', 'woocommerce-products-compare' ) . '" class="woocommerce-products-compare-compare-link"><span class="dashicons dashicons-external"></span></a>
 
-		$html= '<div class="techpace-compare-trigger__wrapper"><button class="button techpace-compare-trigger"  data-product-link="' . esc_attr( get_permalink($post->ID) ) .'" data-product-id="' . esc_attr( $post->ID ).'" data-product-name="'.esc_attr( $post->post_title).'" data-product-image-url="'.esc_attr( get_the_post_thumbnail_url($post->ID) ).'">'.$name.'</button></div>';
+		$html= '<div class="techpace-compare-trigger__wrapper"><button class="button techpace-compare-trigger"  data-product-link="' . esc_attr( get_permalink($post->ID) ) .'" data-product-id="' . esc_attr( $post->ID ).'" data-product-name="'.esc_attr( $post->post_title).'" data-product-image-url="'.esc_attr( get_the_post_thumbnail_url($post->ID) ).'">'.$name.'</button></div>';		
+
+		do_action( 'techpace_test');
 		echo apply_filters( 'woocommerce_products_compare_compare_button', $html, $post->ID, $checked );
 		wp_reset_postdata();
 		return true;
 	}
 	/*TECHPACE POPUP COMPARE */
+	
 	public function display_compare_popup() {
 		
 

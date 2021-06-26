@@ -267,6 +267,7 @@
     border-radius: 10px;
     position: relative;
     max-width: 500px;
+	width: 100%;
 }
 #techpace-compare-popup .techpace-compare-popup__wrapper > h2{
     font-size: 16px;
@@ -359,6 +360,7 @@
 }
 .techpace-compare-page ul{
 	list-style: none;
+	padding: 0;
 }
 .techpace-compare-page .empty-mess{
 	min-height: 300px;
@@ -473,11 +475,13 @@
 }
 .techpace-compare-page .compare-main__head > .product-row > li .product-badge__tag{
 	font-size: 11px;
-    border-radius: 5px;
-    padding: 1px 5px;
+    border-radius: 3px;
+    padding:.3em .4em;
+	line-height: 1;
+	display: inline-block;
 }
 .techpace-compare-page .compare-main__head > .product-row > li .product-badge__tag:not(:last-child){
-	margin-right: 5px;
+	margin-right: 6px;
 }
 /* footer */
 .techpace-compare-page .compare-main__foot > .price-row{
