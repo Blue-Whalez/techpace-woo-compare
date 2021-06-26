@@ -225,7 +225,7 @@ class WC_Products_Compare_Frontend {
 
 		$cats = get_the_terms( $post->ID, 'product_cat' );
 
-		foreach ($cat as $ca) {
+		foreach ($cats as $ca) {
 			if($ca->parent == 0){
 				echo $ca->name;
 			}
