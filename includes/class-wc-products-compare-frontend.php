@@ -24,8 +24,8 @@ class WC_Products_Compare_Frontend {
 		} else {
 			// Display compare button after add to cart.
 			add_action( 'flatsome_product_box_after', array( $this, 'display_compare_button' ), 70 );
-			//add_action( 'woocommerce_single_product_summary', array( $this, 'display_compare_button' ), 31 );
 			add_action( 'woocommerce_after_shop_loop_item_title', array( $this, 'display_compare_button' ), 5 );
+			add_action( 'woocommerce_single_product_summary', array( $this, 'display_compare_button' ), 31 );
 			add_action( 'wp_footer', array( $this, 'display_compare_popup' ), 8);
 			add_action( 'wp_enqueue_scripts', array( $this, 'load_scripts' ) );
 		}
