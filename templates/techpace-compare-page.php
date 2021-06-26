@@ -67,7 +67,7 @@ get_header( 'shop' ); ?>
 			</ul>
 		</div>
 		<div class="compare-main__content">
-		<strong>Thông số kỹ thuật chi tiết</strong>
+		<strong><?php esc_html_e( 'Thông số kỹ thuật chi tiết','woocommerce-products-compare');?></strong>
 			<?php foreach ( $headers as  $header ) { ?>
 				<div class="attribute-row" data-product-id="<?php echo esc_attr( $product->get_id() ); ?>">
 					<div class="compare-row attribute-row__name">
