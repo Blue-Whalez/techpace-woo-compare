@@ -18,7 +18,7 @@ get_header( 'shop' ); ?>
 	<?php
 
 	$products = WC_Products_Compare_Frontend::get_compared_products();
-	if ( $products && count($products)>=1) {
+	if ( $products) {
 		global $product;
 
 		$columns = 'col-'.(count($products)-1);
