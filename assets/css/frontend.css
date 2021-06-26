@@ -374,6 +374,9 @@
 	align-items: center;
 	justify-content: center;
 }
+.techpace-compare-page .compare-main{
+
+}
 .techpace-compare-page .compare-main.col-2,
 .techpace-compare-page .compare-main.col-1{
 	border-right: 1px solid #ebebeb;
@@ -477,7 +480,7 @@
 	margin-right: auto;
 }
 .techpace-compare-page .compare-main__head > .product-row > li .img-wrap img{
-	max-width: 200px;
+	width: 100%;
 }
 .techpace-compare-page .compare-main__head > .product-row > li .product-badge__tags{
 	position: absolute;
