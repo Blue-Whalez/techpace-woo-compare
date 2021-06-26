@@ -223,6 +223,14 @@ class WC_Products_Compare_Frontend {
 
 		//<a href="' . get_home_url() . '/' . $this->get_endpoint() . '" title="' . esc_attr__( 'Compare Page', 'woocommerce-products-compare' ) . '" class="woocommerce-products-compare-compare-link"><span class="dashicons dashicons-external"></span></a>
 
+		$cats = get_the_terms( $post->ID, 'product_cat' );
+
+		foreach ($cat as $ca) {
+			if($ca->parent == 0){
+				echo $ca->name;
+			}
+		}
+
 		$html= '<div class="techpace-compare-trigger__wrapper"><button class="button techpace-compare-trigger"  data-product-link="' . esc_attr( get_permalink($post->ID) ) .'" data-product-id="' . esc_attr( $post->ID ).'" data-product-name="'.esc_attr( $post->post_title).'" data-product-image-url="'.esc_attr( get_the_post_thumbnail_url($post->ID) ).'">'.$name.'</button></div>';		
 
 		do_action( 'techpace_test');
