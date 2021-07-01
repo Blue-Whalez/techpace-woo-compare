@@ -1,12 +1,13 @@
-<?php
+	<?php
 
-if ( ! defined( 'ABSPATH' ) ) {
+	if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
-}
+	}
 
-class WC_Products_Compare_Frontend {
+	class WC_Products_Compare_Frontend {
 	private static $_this;
 	public static $cookie_name;
+	public static $cookie_cate_name;
 
 	/**
 	 * Constructor.
@@ -22,21 +23,23 @@ class WC_Products_Compare_Frontend {
 			add_action( 'wp_ajax_nopriv_wc_products_compare_add_product_ajax', array( $this, 'add_product_ajax' ) );
 
 		} else {
-			// Display compare button after add to cart.
-			$theme = wp_get_theme(); // gets the current theme
-			if ( 'Flatsome' == $theme->name || 'Flatsome' == $theme->parent_theme ) {
-				add_action( 'flatsome_product_box_after', array( $this, 'display_compare_button' ), 70 );
-			}
-			else{
-				add_action( 'woocommerce_shop_loop_item_title', array( $this, 'display_compare_button' ), 20 );
-			}
+				$theme = wp_get_theme(); // gets the current theme
+				if ( 'Flatsome' == $theme->name || 'Flatsome' == $theme->parent_theme ) {
+					add_action( 'flatsome_product_box_after', array( $this, 'display_compare_button' ), 70 );
+				}
+				else{
+					add_action( 'woocommerce_shop_loop_item_title', array( $this, 'display_compare_button' ), 20 );
+				}
 			add_action( 'woocommerce_single_product_summary', array( $this, 'display_compare_button' ), 31 );
 			add_action( 'wp_footer', array( $this, 'display_compare_popup' ), 8);
 			add_action( 'wp_enqueue_scripts', array( $this, 'load_scripts' ) );
 		}
+		// Display compare button after add to cart.
+
 
 		// Set the cookie name.
 		self::$cookie_name = 'wc_products_compare_products';
+		self::$cookie_cate_name = 'wc_products_compare_cate';
 		
 
 		add_action( 'init', array( $this, 'add_endpoint' ) );
@@ -118,6 +121,7 @@ class WC_Products_Compare_Frontend {
 			'ajaxAddProductNonce'  => wp_create_nonce( '_wc_products_compare_add_product_nonce' ),
 			'noCookies'            => __( 'Sorry, you must have cookies enabled in your browser to use compare products feature', 'woocommerce-products-compare' ),
 			'cookieName'           => self::$cookie_name,
+			'cookieCateName'       => self::$cookie_cate_name,
 			'cookieExpiry'         => apply_filters( 'woocommerce_products_compare_cookie_expiry', 7 ),
 			'maxProducts'          => $max_products,
 			'maxAlert'             => sprintf( __( 'Sorry, a maximum of %s products can be compared at one time.', 'woocommerce-products-compare' ), $max_products ),
@@ -212,44 +216,52 @@ class WC_Products_Compare_Frontend {
 	 * @return $html mixed
 	 */
 	public function display_compare_button() {
+		if(is_archive()){
+			global $post;
+			$name = __( 'So sánh', 'woocommerce-products-compare' );
 
-		global $post;
-		$name = __( 'So sánh', 'woocommerce-products-compare' );
+			$checked = checked( $this->is_listed( $post->ID ), true, false );
+			$active = $this->is_listed( $post->ID ) ? 'active' : '';
+			// $active_text = $this->is_listed( $post->ID ) ? 'Đã thêm' : 'So sánh';
+			// $html = '<div class="woocommerce-products-compare-compare-button"><label for="woocommerce-products-compare-checkbox-' . esc_attr( $post->ID ) . '"><input type="checkbox" class="woocommerce-products-compare-checkbox" data-product-id="' . esc_attr( $post->ID ) . '" ' . $checked . ' id="woocommerce-products-compare-checkbox-' . esc_attr( $post->ID ) . '" />&nbsp;' . $name . '</label> </div>';
 
-		$checked = checked( $this->is_listed( $post->ID ), true, false );
-		$active = $this->is_listed( $post->ID ) ? 'active' : '';
-		// $active_text = $this->is_listed( $post->ID ) ? 'Đã thêm' : 'So sánh';
-		// $html = '<div class="woocommerce-products-compare-compare-button"><label for="woocommerce-products-compare-checkbox-' . esc_attr( $post->ID ) . '"><input type="checkbox" class="woocommerce-products-compare-checkbox" data-product-id="' . esc_attr( $post->ID ) . '" ' . $checked . ' id="woocommerce-products-compare-checkbox-' . esc_attr( $post->ID ) . '" />&nbsp;' . $name . '</label> </div>';
-
-		//<a href="' . get_home_url() . '/' . $this->get_endpoint() . '" title="' . esc_attr__( 'Compare Page', 'woocommerce-products-compare' ) . '" class="woocommerce-products-compare-compare-link"><span class="dashicons dashicons-external"></span></a>
-
-		$cats = get_the_terms( $post->ID, 'product_cat' );
-
-		foreach ($cats as $ca) {
-			if($ca->parent == 0){
-				echo $ca->name;
+			//<a href="' . get_home_url() . '/' . $this->get_endpoint() . '" title="' . esc_attr__( 'Compare Page', 'woocommerce-products-compare' ) . '" class="woocommerce-products-compare-compare-link"><span class="dashicons dashicons-external"></span></a>
+			
+			$parent = "";
+			$terms = get_the_terms( $post->ID, 'product_cat' )[0];
+			$options = array(
+				'format' => 'slug',
+				'link' => false
+			);
+			$list = explode('/',get_term_parents_list( 	$terms -> term_id, 'product_cat', $options ));
+			
+			if(count($list)>0){
+				$parent = $list[0];
 			}
+			//var_dump($list);
+			//var_dump($parent);
+
+			$html= '<div class="techpace-compare-trigger__wrapper"><button class="button techpace-compare-trigger"  data-product-link="' . esc_attr( get_permalink($post->ID) ) .'" data-product-id="' . esc_attr( $post->ID ).'" data-product-cate="' . esc_attr( $parent ).'" data-product-name="'.esc_attr( $post->post_title).'" data-product-image-url="'.esc_attr( get_the_post_thumbnail_url($post->ID) ).'">'.$name.'</button></div>';		
+
+			do_action( 'techpace_test');
+			echo apply_filters( 'woocommerce_products_compare_compare_button', $html, $post->ID, $checked );
+			wp_reset_postdata();
 		}
-
-		$html= '<div class="techpace-compare-trigger__wrapper"><button class="button techpace-compare-trigger"  data-product-link="' . esc_attr( get_permalink($post->ID) ) .'" data-product-id="' . esc_attr( $post->ID ).'" data-product-name="'.esc_attr( $post->post_title).'" data-product-image-url="'.esc_attr( get_the_post_thumbnail_url($post->ID) ).'">'.$name.'</button></div>';		
-
-		do_action( 'techpace_test');
-		echo apply_filters( 'woocommerce_products_compare_compare_button', $html, $post->ID, $checked );
-		wp_reset_postdata();
 		return true;
 	}
 	/*TECHPACE POPUP COMPARE */
-	
+
 	public function display_compare_popup() {
 		
 
+		
 		$html = '<div id="techpace-compare-popup"><div class="techpace-compare-popup__wrapper"><h2>So sánh sản phẩm</h2><span class="close-popup-btn">x Đóng</span><div id="techpace-compare__mess"></div>';
 
 		$products = WC_Products_Compare_Frontend::get_compared_products();
 
 		$endpoint = WC_Products_Compare_Frontend::get_endpoint();
 
-		//if ( $products ) {
+		if ( $products ) {
 
 			$html .= '<ul class="techpace-compare-list">' . PHP_EOL;
 
@@ -281,7 +293,7 @@ class WC_Products_Compare_Frontend {
 
 		//} else {
 			// $html .= '<p class="no-products">' . __( 'Add some products to compare.', 'woocommerce-products-compare' ) . '</p>' . PHP_EOL;
-		//}
+		}
 		$html .= '<div class="techpace-compare__button-wrapper">';
 
 		$html .= '<a href="' . esc_url( site_url() . '/' . $endpoint  ) . '" title="' . esc_attr( 'So sánh ngay', 'woocommerce-products-compare' ) . '" class="button techpace-compare__button">' . __( 'So sánh ngay', 'woocommerce-products-compare' ) . '</a>' . PHP_EOL;
@@ -291,8 +303,10 @@ class WC_Products_Compare_Frontend {
 		};
 
 		$html .= '</div>' . PHP_EOL;
-	
-		$html.="</div></div>";
+
+		$html .="</div>";
+
+		$html .="</div>";
 		echo $html;
 		return true;
 	}
@@ -509,6 +523,6 @@ class WC_Products_Compare_Frontend {
 		echo $html;
 		exit;
 	}
-}
+	}
 
-new WC_Products_Compare_Frontend();
+	new WC_Products_Compare_Frontend();

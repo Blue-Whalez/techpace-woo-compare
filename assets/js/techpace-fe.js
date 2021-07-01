@@ -11,6 +11,7 @@ jQuery(document).ready(function ($) {
 				return false;
 			}
 		},
+		
 
 		setComparedProducts: function (productID) {
 			// get existing product list
@@ -48,6 +49,37 @@ jQuery(document).ready(function ($) {
 			// set the cookie
 			$.cookie.raw = true;
 			$.cookie(wc_products_compare_local.cookieName, products.toString(), {
+				expires: parseInt(wc_products_compare_local.cookieExpiry, 10),
+				path: "/",
+			});
+
+			return true;
+		},
+		resetComparedProducts: function (){
+			console.log('reset do khác cate');
+			$.cookie.raw = true;
+			$.cookie(wc_products_compare_local.cookieName, "false", {
+				expires: parseInt(wc_products_compare_local.cookieExpiry, 10),
+				path: "/",
+			});
+
+			return true;
+		},
+		getCateProducts: function () {
+			var cate = $.cookie(wc_products_compare_local.cookieCateName);
+			if (typeof cate !== "undefined" && cate.length) {
+				return cate;
+			} else {
+				return false;
+			}
+		},
+		setCateProducts: function (cateSlug) {
+			// get existing product list
+			var cate = [String(cateSlug).trim()];
+
+			// set the cookie
+			$.cookie.raw = true;
+			$.cookie(wc_products_compare_local.cookieCateName, cate.toString(), {
 				expires: parseInt(wc_products_compare_local.cookieExpiry, 10),
 				path: "/",
 			});
@@ -93,24 +125,40 @@ jQuery(document).ready(function ($) {
 						alert(wc_products_compare_local.noCookies);
 						return;
 					}
-					let compare_list =
-					$.wc_products_compare_frontend.getComparedProducts();
+					
 					if (!popup.hasClass("active")) {
 						//add product on UI
-						//check số lượng
+						//check trùng cate
+						let cate = $.wc_products_compare_frontend.getCateProducts();
+						console.log(cate +" vs this: "+ $(this).data("product-cate"));
+						if(cate != $(this).data("product-cate")){
+							//NẾU KHÁC RESET ALL
+							popup_mess.text(
+								"Chỉ có thể so sánh sản phẩm cùng nhóm hàng. Sản phẩm trước đã được xoá khỏi giỏ so sánh.",
+								);
+								setTimeout(function(){
+									popup_mess.text("");
+								}, 2000)
+								removeAll();
+								
+						}
 						
+						//check số lượng
+						let compare_list =
+						$.wc_products_compare_frontend.getComparedProducts();
 						let count_items = compare_list.length - 1;
 						console.log('count cookie', count_items);
 						if (count_items < 3) {
 							let this_product = {
 								name: $(this).data("product-name"),
+								cate: $(this).data("product-cate"),
 								url: $(this).data("product-link"),
 								img: $(this).data("product-image-url"),
 								id: $(this).data("product-id"),
 							};
 							//console.log('clicked',this_product);
-							//check trùng
-
+						
+							//Check trùng sp
 							if (
 								compare_list &&
 								compare_list.includes(this_product.id.toString())
@@ -119,20 +167,21 @@ jQuery(document).ready(function ($) {
 									"Bạn đã chọn sản phẩm này rồi, vui lòng chọn sản phẩm khác!",
 								);
 							} else {
-								//add to UI
-								let product_html = `<li class="techpace-compare-item" data-product-id="${this_product.id}">
-								<a href="${this_product.url}" class="product-link">
-								<div class="img-wrap"><div><img width="100" height="100" src="${this_product.img}" class="attachment-shop_thumbnail size-shop_thumbnail" alt="" loading="lazy"/></div></div>
-								<h3>${this_product.name}</h3>
-								</a>
-								<span class="techpace-compare-item__remove" href="#" title="Remove Product"  onclick="removeCompare(${this_product.id}, event)">x</span></li>`;
-								popup_compare_list.append(product_html);
-								//add to cookie
-								$.wc_products_compare_frontend.setComparedProducts(
-									this_product.id,
-								);
+									//add to cookie
+									$.wc_products_compare_frontend.setCateProducts(this_product.cate);
+									$.wc_products_compare_frontend.setComparedProducts(
+										this_product.id,
+									);
+									//add to UI
+									let product_html = `<li class="techpace-compare-item" data-product-id="${this_product.id}">
+									<a href="${this_product.url}" class="product-link">
+									<div class="img-wrap"><div><img width="100" height="100" src="${this_product.img}" class="attachment-shop_thumbnail size-shop_thumbnail" alt="" loading="lazy"/></div></div>
+									<h3>${this_product.name}</h3>
+									</a>
+									<span class="techpace-compare-item__remove" href="#" title="Remove Product"  onclick="removeCompare(${this_product.id}, event)">x</span></li>`;
+									popup_compare_list.append(product_html);
+								}
 								console.log("added js", compare_list);
-							}
 						} else {
 							popup_mess.text(
 								"Vui lòng xóa bớt sản phẩm để tiếp tục so sánh!",
@@ -157,31 +206,32 @@ jQuery(document).ready(function ($) {
 						$(e.target).closest("li.techpace-compare-item").detach();
 						checkAvailable(popup_compare_btn);
 						checkAvailable(popup_remove_all);
-						if (
-							$.wc_products_compare_frontend.getComparedProducts()
-								.length <= 1
-						)
-							popupClose();
+					}
+					if (
+						$.wc_products_compare_frontend.getComparedProducts()
+							.length <= 1
+					){
+						popupClose();
+
 					}
 				};
 				//REMOVE ALL PRODUCT
-				popup_remove_all.on("click", function (e) {
-					e.preventDefault();
+				function removeAll (){
 					console.log("remove all");
 					$(">li", popup_compare_list).each(function (i) {
 						var removeID = $(this).data("product-id");
-
+						console.log('remove item', removeID);
 						// Unset the product from cookie.
 						$.wc_products_compare_frontend.unsetComparedProducts(
-							removeID,
+							removeID
 						);
-
 						//Remove from FE
 						$(this).detach();
-
-						// Uncheck compare checkbox.
-						//$('input.woocommerce-products-compare-checkbox[data-product-id="' + removeID + '"]').prop('checked', false);
-					}, popupClose());
+					});
+				};
+				popup_remove_all.on("click", function (e) {
+					e.preventDefault();
+					removeAll(e), popupClose();
 				});
 				//CLOSE POPUP
 				popup_close.on("click", function () {
@@ -191,6 +241,7 @@ jQuery(document).ready(function ($) {
 				// popup.on('click', function(e){
 				// 	e.stopPropagation();
 				// 	e.preventDefault();
+				// 	console.log('bấm vào nè', e.target);
 				// 	var container = $(".techpace-compare-popup__wrapper", $(this));
 				// 	// Nếu click bên ngoài đối tượng container thì ẩn nó đi
 				// 	if (!container.is(e.target) && container.has(e.target).length === 0)
@@ -211,6 +262,10 @@ jQuery(document).ready(function ($) {
 			let cookie = getCookie(wc_products_compare_local.cookieName);
 			if(cookie==""){
 				setCookie(wc_products_compare_local.cookieName, "false",wc_products_compare_local.cookieExpiry );
+			}
+			let cateCookie = getCookie(wc_products_compare_local.cookieCateName);
+			if(cateCookie==""){
+				setCookie(wc_products_compare_local.cookieCateName, "",wc_products_compare_local.cookieExpiry );
 			}
 			// 	Add/remove products to compare
 			$.wc_products_compare_frontend.popupCompare();
